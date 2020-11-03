@@ -1,75 +1,39 @@
 <template>
-    <div>
-        <div v-if="state.user.isAdmin">
-            <i style="color: red">Admin</i>
-            <br>
-        </div>
-        <hr>
-        <TwootItem v-for="twoot in state.user.twoots" :key="twoot.id" :twoot="twoot"
-        ></TwootItem>
-        <hr>
-        <form @submit.prevent="createNewTwoot">
-            <label for="newToot"><strong>New Twoot</strong></label><br>
-            <textarea id="newToot" rows="4" v-model="state.newTwootContent"></textarea>
-            <br>
-
-            <div>
-                <label for="newTootType"><strong>Type: </strong></label>
-                <select name="" id="newTootType" v-model="state.selectedTwootType">
-                    <option :value="option.value"
-                            v-for="(option, index) in state.twootTypes"
-                            :key="index"
-                    >
-                        {{ option.name }}
-                    </option>
-                </select>
-            </div>
-
-            <button>
-                Twoot!
-            </button>
-
-        </form>
+    <h1>@{{ state.user.username}}</h1>
+    <h2>{{ userId }}</h2>
+    <div v-if="state.user.isAdmin">
+        <i style="color: red">Admin</i>
+        <br>
     </div>
+    <TwootItem v-for="twoot in state.user.twoots" :key="twoot.id" :twoot="twoot"
+    ></TwootItem>
+    <CreateTwootPanel></CreateTwootPanel>
 </template>
 
 <script>
-    import TwootItem from "./TwootItem";
-
-    import { reactive, computed } from 'vue'; // Composition API
+    import {reactive, computed} from 'vue'; // Composition API
+    import {useRoute} from 'vue-router'; // Objeto ruta para referenciar
+    import { users } from "../assets/users";
+    import TwootItem from "../components/TwootItem";
+    import CreateTwootPanel from "../components/CreateTwootPanel";
 
     export default {
         name: 'UserProfile',
-        components: {TwootItem},
+        components: {TwootItem, CreateTwootPanel},
         setup(props, context) {
-            const state = reactive({ // Data
-                newTwootContent: '',
-                selectedTwootType: 'instant',
+            const route = useRoute();
+            const userId = computed(() => route.params.userId);
 
-                twootTypes: [
-                    {value: 'draft', name: 'Draft'},
-                    {value: 'instant', name: 'Instant Twoot'},
-                ],
-                isLoading: false,
+            // Busca el usuario en la lista.
+            const state = reactive({ // Data
                 followers: 0,
-                user: {
-                    id: 1,
-                    username: '_dddd',
-                    firstName: 'Francisco',
-                    lastName: 'Tapia',
-                    email: 'test@test.com',
-                    isAdmin: true,
-                    twoots: [
-                        {id: 1, content: 'Twotter is Amazing!'},
-                        {id: 2, content: "Don't forget to Subscribe"},
-                    ],
-                }
+                user: users[userId.value - 1] || users[1]
             });
 
-            const newTwootCharactedCount = computed( () => state.newTwootContent.length); // Computed
+            const newTwootCharactedCount = computed(() => state.newTwootContent.length); // Computed
 
             function createNewTwoot() { // Methods
-                if (state.newTwootContent && state.selectedTwootType !== 'draft'){
+                if (state.newTwootContent && state.selectedTwootType !== 'draft') {
                     context.emit('add-twoot', state.newTwootContent);
                     state.newTwootContent = '';
                 }
@@ -79,6 +43,7 @@
                 state,
                 newTwootCharactedCount,
                 createNewTwoot,
+                userId
             };
         },
     }

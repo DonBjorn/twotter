@@ -1,5 +1,7 @@
 <template>
-    $END$
+    <div>
+        <h1>ADMIN</h1>
+    </div>
 </template>
 
 <script>
